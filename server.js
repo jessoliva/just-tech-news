@@ -1,0 +1,1 @@
+// installed dependencies: npm install express sequelize mysql2
