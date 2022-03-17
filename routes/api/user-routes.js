@@ -53,7 +53,8 @@ router.get('/:id', (req, res) => {
 
 // POST /api/users
 router.post('/', (req, res) => {
-    // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
+
+    // there's a hook for beforeCreate
     User.create({
         username: req.body.username,
         email: req.body.email,
@@ -71,10 +72,12 @@ router.post('/', (req, res) => {
 
 // PUT /api/users/1
 router.put('/:id', (req, res) => {
-    // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
-  
+    
+    // there's a hook for beforeUpdate
     // if req.body has exact key/value pairs to match the model, you can just use `req.body` instead
     User.update(req.body, {
+        // Will select all records that are about to be updated and emit before- + after- Update on each instance
+        individualHooks: true,
         where: {
             id: req.params.id
         }
