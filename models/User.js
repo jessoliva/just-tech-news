@@ -6,7 +6,16 @@ const sequelize = require('../config/connection');
 const bcrypt = require('bcrypt');
 
 // create our User model
-class User extends Model {}
+class User extends Model {
+    // set up method to run on instance data (per user) to check password
+    // instance method --> returns or makes use of information (i.e., properties) specific to that particular object
+    // Remember that objects generated from classes are instances of the class --> each user created is an instance of this class
+    // create an instance method on the User model definition to access the password property of each user instance
+    checkPassword(loginPw) {
+        return bcrypt.compareSync(loginPw, this.password);
+        // Using the keyword this, we can access this user's properties, including the password, which was stored as a hashed string
+    }
+}
 // This Model class is what we create our own models from using the extends keyword so User inherits all of the functionality the Model class has
 
 // define table columns and configuration
