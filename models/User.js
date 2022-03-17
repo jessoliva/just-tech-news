@@ -2,14 +2,16 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
 
+// to hash passwords to protect them!
+const bcrypt = require('bcrypt');
+
 // create our User model
 class User extends Model {}
 // This Model class is what we create our own models from using the extends keyword so User inherits all of the functionality the Model class has
 
 // define table columns and configuration
 User.init(
-    {
-        // TABLE COLUMN DEFINITIONS GO HERE
+    { // TABLE COLUMN DEFINITIONS GO HERE
         // Column settings: https://sequelize.org/v5/manual/models-definition.html
         // Data types: https://sequelize.org/v5/manual/data-types.html
         // define an id column
@@ -51,8 +53,17 @@ User.init(
             }
         }
     },
-    {
-        // TABLE CONFIGURATION OPTIONS GO HERE (https://sequelize.org/v5/manual/models-definition.html#configuration)
+    { // TABLE CONFIGURATION OPTIONS GO HERE (https://sequelize.org/v5/manual/models-definition.html#configuration)
+        // object: hooks with it's own functions
+        hooks: {
+            // set up beforeCreate lifecycle "hook" functionality
+            beforeCreate(userData) {
+                return bcrypt.hash(userData.password, 10).then(newUserData => {
+                    return newUserData //newUserData is now equal to the hashed password created
+                });
+            }
+
+        },    
         // pass in our imported sequelize connection (the direct connection to our database)
         sequelize,
         // don't automatically create createdAt/updatedAt timestamp fields
@@ -70,6 +81,12 @@ User.init(
 // Once we create the User class, we use the .init() method to initialize the model's data and configuration, passing in 2 objects as arguments
 // 1st object --> will define the columns and data types for those columns
 // 2nd object --> it accepts configures certain options for the table
+// The nested level of the object inserted is very important. Notice that the hooks property was added to the 2nd object in User.init()
+// HOOK AND HASH PASSWORD   
+// We use the beforeCreate() hook to execute the bcrypt hash function on the plaintext password
+// In the bcrypt hash function, we pass in the userData object that contains the plaintext password in the password property. We also pass in a saltRound value of 10
+// The resulting hashed password is then passed to the Promise object as a newUserData object with a hashed password property
+// The return statement then exits out of the function, returning the hashed password in the newUserData function
 
 // export the newly created model so we can use it in other parts of the app
 module.exports = User;
