@@ -1,13 +1,13 @@
 // create five routes that will work with the User model to perform Create Read Update Delete operations
 
-const router = require('express').Router();
+const userRouter = require('express').Router();
 // importing exported User object from models/index.js
 const { User } = require('../../models');
 
 // These endpoints for the server are going to be accessible at the /api/users URL
 
 // GET /api/users
-router.get('/', (req, res) => {
+userRouter.get('/', (req, res) => {
     // Access our User model and run .findAll() method)
     User.findAll({
         attributes: { exclude: ['password'] }
@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
+        // The 500 Internal Server Error is a "server-side" error, meaning the problem is not with your PC or Internet connection but instead is a problem with the web site's server
     });
 });
 // API endpoint so that when the client makes a GET request to /api/users, we will select all users from the user table in the database and send it back as JSON
@@ -26,7 +27,7 @@ router.get('/', (req, res) => {
 
 // GET /api/users/1
 // : means whatever is written in this sxn of the url is going to be captured as part as the req.params object 
-router.get('/:id', (req, res) => {
+userRouter.get('/:id', (req, res) => {
     User.findOne({
         attributes: { exclude: ['password'] },
         where: { // where = object
@@ -52,7 +53,7 @@ router.get('/:id', (req, res) => {
 // Because we're looking for one user, there's the possibility that we could accidentally search for a user with a nonexistent id value. Therefore, if the .then() method returns nothing from the query, we send a 404 status back to the client to indicate everything's okay and they just asked for the wrong piece of data
 
 // POST /api/users
-router.post('/', (req, res) => {
+userRouter.post('/', (req, res) => {
 
     // there's a hook for beforeCreate
     User.create({
@@ -62,7 +63,7 @@ router.post('/', (req, res) => {
         // comes from the form submitting this data
     })
     .then(dbUserData => res.json(dbUserData))
-        .catch(err => {
+    .catch(err => {
         console.log(err);
         res.status(500).json(err);
     });
@@ -72,7 +73,7 @@ router.post('/', (req, res) => {
 
 // verify user's identity
 // route will be found at http://localhost:3001/api/users/login
-router.post('/login', (req, res) => {
+userRouter.post('/login', (req, res) => {
 
     // first step will be to find the instance of a user that contains the user's credentials
     // .findOne() Sequelize method looks for a user with the specified email saved as req.body.email
@@ -116,7 +117,7 @@ router.post('/login', (req, res) => {
 // We queried the User table using the findOne() method for the email entered by the user and assigned it to req.body.email
 
 // PUT /api/users/1
-router.put('/:id', (req, res) => {
+userRouter.put('/:id', (req, res) => {
     
     // there's a hook for beforeUpdate
     // if req.body has exact key/value pairs to match the model, you can just use `req.body` instead
@@ -144,7 +145,7 @@ router.put('/:id', (req, res) => {
 // We pass in req.body to provide the new data we want to use in the update and req.params.id to indicate where exactly we want that new data to be used
 
 // DELETE /api/users/1
-router.delete('/:id', (req, res) => {
+userRouter.delete('/:id', (req, res) => {
     User.destroy({
         where: {
             id: req.params.id
@@ -164,4 +165,4 @@ router.delete('/:id', (req, res) => {
 });
 // To delete data, use the .destroy() method and provide some type of identifier to indicate where exactly we would like to delete data from the user database table --> req.params.id
 
-module.exports = router;
+module.exports = userRouter;

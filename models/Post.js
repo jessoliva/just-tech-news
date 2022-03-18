@@ -39,7 +39,7 @@ Post.init(
     {
         sequelize,
         freezeTableName: true,
-        underscored: true,
+        underscored: true, // column names to have an underscore naming convention
         modelName: 'post'
     }
 );
