@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 // create our User model
 class User extends Model {
     // set up method to run on instance data (per user) to check password
+    // we set it up so that a user can check if their password is correct for a login system.
     // instance method --> returns or makes use of information (i.e., properties) specific to that particular object
     // Remember that objects generated from classes are instances of the class --> each user created is an instance of this class
     // create an instance method on the User model definition to access the password property of each user instance
