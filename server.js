@@ -17,7 +17,7 @@ app.use(routes);
 // Since we set up the routes the way we did, we don't have to worry about importing multiple files for different endpoints. The router instance in routes/index.js collected everything for us and packaged them up for server.js to use
 
 // turn on connection to db and server
-sequelize.sync({ force: false }).then(() => {
+sequelize.sync({ force: false }).then(() => { // switch back and forth btw true and false - true when you need to drop db, false when that has happened already
     app.listen(PORT, () => console.log(`Now listening in ${PORT}`));
 });
 // The "sync" part means that this is Sequelize taking the models and connecting them to associated database tables

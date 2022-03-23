@@ -2,7 +2,7 @@
 
 const userRouter = require('express').Router();
 // importing exported User object from models/index.js
-const { User } = require('../../models');
+const { User, Post, Vote } = require('../../models');
 
 // These endpoints for the server are going to be accessible at the /api/users URL
 
@@ -32,7 +32,21 @@ userRouter.get('/:id', (req, res) => {
         attributes: { exclude: ['password'] },
         where: { // where = object
             id: req.params.id
-        }
+        },
+        include: [
+            {
+              model: Post,
+              attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+              model: Post,
+              attributes: ['title'],
+              through: Vote,
+              as: 'voted_posts'
+            } 
+            // When we query users, we'll get back a list of posts that a user has actually created and a list of posts that a user has voted on. This will be the first time we use that through table association we created earlier!
+            // when we query a single user, we'll receive the title information of every post they've ever voted on
+        ]
     })
     .then(dbUserData => {
         if (!dbUserData) {

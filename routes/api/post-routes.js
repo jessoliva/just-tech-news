@@ -1,14 +1,21 @@
 const postRouter = require('express').Router();
-const { Post, User } = require('../../models');
+const sequelize = require('../../config/connection');
+const { Post, User, Vote } = require('../../models');
 // included Post model because In a query to the post table, we would like to retrieve not only information about each post, but also the user that posted it. With the foreign key, user_id, we can form a JOIN, an essential characteristic of the relational data model
 
-// get all posts
+// get all posts /api/posts
 postRouter.get('/', (req, res) => {
 
     console.log('======================');
 
     Post.findAll({ // this is the query
-        attributes: ['id', 'post_url', 'title', 'created_at'],
+        attributes: [
+            'id',
+            'post_url',
+            'title',
+            'created_at',
+            [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+        ],
         order: [['created_at', 'DESC']],
         include: [
             {
@@ -40,7 +47,13 @@ postRouter.get('/:id', (req, res) => {
         where: {
             id: req.params.id
         },
-        attributes: ['id', 'post_url', 'title', 'created_at'],
+        attributes: [
+            'id',
+            'post_url',
+            'title',
+            'created_at',
+            [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+        ],
         include: [
             {
                 model: User,
@@ -80,6 +93,51 @@ postRouter.post('/', (req, res) => {
         res.status(500).json(err);
     }); 
 });
+
+// When we vote on a post, we're technically updating that post's data. This means that we should create a PUT route for updating a post
+// PUT /api/posts/upvote
+postRouter.put('/upvote', (req, res) => {
+    // WITH SEQUELIZE
+    // create the vote
+    Vote.create({
+        user_id: req.body.user_id,
+        post_id: req.body.post_id
+    })
+    .then(() => {
+        // then find the post we just voted on
+        // So when we vote on a post, we'll see that post—and its updated vote total—in the response
+        return Post.findOne({
+            where: {
+                id: req.body.post_id
+            },
+            attributes: [
+                'id',
+                'post_url',
+                'title',
+                'created_at',
+                // use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
+                [
+                    sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
+                    'vote_count'
+                ] // .literal() allows us to run regular SQL queries from within the Sequelize method-based queries
+            ]
+        })
+    })
+    .then(dbPostData => res.json(dbPostData))
+    .catch(err => {
+        console.log(err);
+        res.status(400).json(err);
+    });
+
+    // WITHOUT SEQUELIZE
+    // Vote.create({
+    //     user_id: req.body.user_id,
+    //     post_id: req.body.post_id
+    // })
+    // .then(dbPostData => res.json(dbPostData))
+    // .catch(err => res.json(err));
+});
+// Make sure this PUT route is defined before the /:id PUT route, though. Otherwise, Express.js will think the word "upvote" is a valid parameter for /:id
 
 // update title of a post
 postRouter.put('/:id', (req, res) => {
