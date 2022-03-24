@@ -1,6 +1,6 @@
 const postRouter = require('express').Router();
 const sequelize = require('../../config/connection');
-const { Post, User, Vote } = require('../../models');
+const { Post, User, Vote, Comment } = require('../../models');
 // included Post model because In a query to the post table, we would like to retrieve not only information about each post, but also the user that posted it. With the foreign key, user_id, we can form a JOIN, an essential characteristic of the relational data model
 
 // get all posts /api/posts
@@ -17,11 +17,20 @@ postRouter.get('/', (req, res) => {
             [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
         ],
         order: [['created_at', 'DESC']],
-        include: [
+        include: [ // include queries
             {
-              model: User,
-              attributes: ['username']
+                model: Comment,
+                attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+                include: {
+                    model: User,
+                    attributes: ['username']
+                } // include the User model itself so it can attach the username to the comment
+            },
+            {
+                model: User,
+                attributes: ['username']
             }
+            //  the three include properties translated into three LEFT OUTER JOIN statements. One joins post with comment, another post with user, and then comment with user
         ]
         // the include property is expressed as an array of objects
         // same as JOIN in sql
@@ -32,8 +41,8 @@ postRouter.get('/', (req, res) => {
     // database call is the findAll and what is returned
     .then(dbPostData => res.json(dbPostData)) 
     .catch(err => {
-      console.log(err);
-      res.status(500).json(err);
+        console.log(err);
+        res.status(500).json(err);
     });
 });
 // the order property is assigned a nested array that orders by the created_at column in descending order. This will ensure that the latest posted articles will appear first.
@@ -55,6 +64,14 @@ postRouter.get('/:id', (req, res) => {
             [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
         ],
         include: [
+            {
+                model: Comment,
+                attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+                include: {
+                    model: User,
+                    attributes: ['username']
+                } // include the User model itself so it can attach the username to the comment
+            },
             {
                 model: User,
                 attributes: ['username']
