@@ -7,7 +7,10 @@ const routes = require('./routes');
 const sequelize = require('./config/connection');
 
 const app = express();
+// This uses Heroku's process.env.PORT value when deployed and 3001 when run locally
 const PORT = process.env.PORT || 3001;
+// for heroku: murmuring-tundra-83143
+// Having a dynamic port number is important, because it is very unlikely that the port number you hardcode (e.g., 3001) would be the port Heroku runs your app on
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
