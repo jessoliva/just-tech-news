@@ -122,40 +122,6 @@ postRouter.put('/upvote', (req, res) => {
         console.log(err);
         res.status(400).json(err);
     });
-    // By creating all of that vvv complicated code at the model level, now we have a much more readable method to use in the route
-
-    // // WITH SEQUELIZE
-    // // create the vote
-    // Vote.create({
-    //     user_id: req.body.user_id,
-    //     post_id: req.body.post_id
-    // })
-    // .then(() => {
-    //     // then find the post we just voted on
-    //     // So when we vote on a post, we'll see that post—and its updated vote total—in the response
-    //     return Post.findOne({
-    //         where: {
-    //             id: req.body.post_id
-    //         },
-    //         attributes: [
-    //             'id',
-    //             'post_url',
-    //             'title',
-    //             'created_at',
-    //             // use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
-    //             [
-    //                 sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
-    //                 'vote_count'
-    //             ] // .literal() allows us to run regular SQL queries from within the Sequelize method-based queries
-    //         ]
-    //     })
-    // })
-    // .then(dbPostData => res.json(dbPostData))
-    // .catch(err => {
-    //     console.log(err);
-    //     res.status(400).json(err);
-    // });
-
 });
 // Make sure this PUT route is defined before the /:id PUT route, though. Otherwise, Express.js will think the word "upvote" is a valid parameter for /:id
 
