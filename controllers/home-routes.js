@@ -47,4 +47,8 @@ router.get('/', (req, res) => {
 // This template was light on content; it only included a single <div>. Handlebars.js will automatically feed that into the main.handlebars template, however, and respond with a complete HTML file.
 // The res.render() method can accept a second argument, an object, which includes all of the data you want to pass to your template
 
+router.get('/login', (req, res) => {
+    res.render('login');
+});
+
 module.exports = router;
