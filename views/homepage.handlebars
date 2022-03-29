@@ -1,4 +1,5 @@
 <ol class="post-list">
+  {{#each posts}} {{!-- loop through each element from the posts object --}}
   <li>
     <article class="post">
       <div class="title">
@@ -13,7 +14,10 @@
       </div>
     </article>
   </li>
+  {{/each}}
 </ol>
+{{!-- Note the use of '#each' to begin the loop and '/each' to define where it ends. Any HTML code in between (e.g., the <li> element) will be repeated for every item in posts --}}
+{{!-- Within the '#each block', Handlebars.js is smart enough to know that it's working with an object on each iteration, so it looks for the necessary properties. --}}
 
 {{!-- expressions replaced with data from home-routes.js --}}
 
