@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
         // saves as an array 
         const posts = dbPostData.map(post => post.get({ plain: true }));
 
-        // sending posts as an object to template so we can add other properties to the template later on
+        // sending posts as an object to homepage-handlebars template so we can add other properties to the template later on
         res.render('homepage', { posts });
     })
     .catch(err => {
