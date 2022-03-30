@@ -115,47 +115,18 @@ postRouter.post('/', (req, res) => {
 // PUT /api/posts/upvote
 postRouter.put('/upvote', (req, res) => {
 
-    // custom static method created in models/Post.js
-    Post.upvote(req.body, { Vote })
-    .then(updatedPostData => res.json(updatedPostData))
-    .catch(err => {
-        console.log(err);
-        res.status(400).json(err);
-    });
-    // By creating all of that vvv complicated code at the model level, now we have a much more readable method to use in the route
+    // make sure the session exists first
+    if (req.session.loggedIn) {
 
-    // // WITH SEQUELIZE
-    // // create the vote
-    // Vote.create({
-    //     user_id: req.body.user_id,
-    //     post_id: req.body.post_id
-    // })
-    // .then(() => {
-    //     // then find the post we just voted on
-    //     // So when we vote on a post, we'll see that post—and its updated vote total—in the response
-    //     return Post.findOne({
-    //         where: {
-    //             id: req.body.post_id
-    //         },
-    //         attributes: [
-    //             'id',
-    //             'post_url',
-    //             'title',
-    //             'created_at',
-    //             // use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
-    //             [
-    //                 sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
-    //                 'vote_count'
-    //             ] // .literal() allows us to run regular SQL queries from within the Sequelize method-based queries
-    //         ]
-    //     })
-    // })
-    // .then(dbPostData => res.json(dbPostData))
-    // .catch(err => {
-    //     console.log(err);
-    //     res.status(400).json(err);
-    // });
-
+        // pass session id along with all destructured properties on req.body
+        Post.upvote({ ...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
+        .then(updatedVoteData => res.json(updatedVoteData))
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+        // custom upvote static method created in models/Post.js
+    }
 });
 // Make sure this PUT route is defined before the /:id PUT route, though. Otherwise, Express.js will think the word "upvote" is a valid parameter for /:id
 
