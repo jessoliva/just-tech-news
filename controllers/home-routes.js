@@ -5,6 +5,9 @@ const sequelize = require('../config/connection');
 const { Post, User, Comment } = require('../models');
 
 router.get('/', (req, res) => {
+    // This route now has access to our user's session
+    console.log(req.session);
+
     Post.findAll({
         attributes: [
           'id',
@@ -48,6 +51,13 @@ router.get('/', (req, res) => {
 // The res.render() method can accept a second argument, an object, which includes all of the data you want to pass to your template
 
 router.get('/login', (req, res) => {
+
+    // check for a session and redirect to the homepage if one exists
+    if (req.session.loggedIn) {
+        res.redirect('/');
+        return;
+    }
+
     res.render('login');
 });
 

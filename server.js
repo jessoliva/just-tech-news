@@ -1,4 +1,5 @@
-// installed dependencies: npm install express sequelize mysql2 express-handlebars
+// installed dependencies: npm install express sequelize mysql2 express-handlebars express-session connect-session-sequelize
+
 
 // express
 const express = require('express');
@@ -14,6 +15,24 @@ const sequelize = require('./config/connection');
 // express-handlebars
 const exphbs = require('express-handlebars');
 const hbs = exphbs.create({});
+
+// Sessions allow our Express.js server to keep track of which user is making a request, and store useful data about them in memory
+const session = require('express-session');
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+
+const sess = {
+    secret: 'Super secret secret',
+    cookie: {}, // this is all we need to do tell our session to use cookies
+    resave: false,
+    saveUninitialized: true,
+    store: new SequelizeStore({
+        db: sequelize
+    })
+};
+
+app.use(session(sess));
+//
+// This code sets up an Express.js session and connects the session to our Sequelize database.
 
 // express-handlebars engine setup
 app.engine('handlebars', hbs.engine);

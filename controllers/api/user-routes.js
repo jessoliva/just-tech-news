@@ -84,7 +84,16 @@ userRouter.post('/', (req, res) => {
         password: req.body.password
         // comes from the form submitting this data
     })
-    .then(dbUserData => res.json(dbUserData))
+    .then(dbUserData => {
+        req.session.save(() => { // accessing the session information in the routes
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+        
+            res.json(dbUserData);
+        });
+        // We want to make sure the session is created before we send the response back, so we're wrapping the variables in a callback. The req.session.save() method will initiate the creation of the session and then run the callback function once complete.
+    })
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
@@ -131,8 +140,16 @@ userRouter.post('/login', (req, res) => {
             return;
         }
         
-        // However, if there is a match, the conditional statement block is ignored, and a response with the data and the message "You are now logged in." is sent instead.
-        res.json({ user: dbUserData, message: 'You are now logged in!' });
+        // if there is a match, the conditional statement block is ignored, and a response with the data and the message "You are now logged in." is sent instead.
+        // 
+        req.session.save(() => {
+            // declare session variables
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+      
+            res.json({ user: dbUserData, message: 'You are now logged in!' });
+        });
     });
 })
 //In this case, a login route could've used the GET method since it doesn't actually create or insert anything into the database. But there is a reason why a POST is the standard for the login that's in process. A GET method carries the request parameter appended in the URL string, whereas a POST method carries the request parameter in req.body, which makes it a more secure way of transferring data from the client to the server. Remember, the password is still in plaintext, which makes this transmission process a vulnerable link in the chain
