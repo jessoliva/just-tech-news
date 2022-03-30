@@ -38,7 +38,11 @@ router.get('/', (req, res) => {
         const posts = dbPostData.map(post => post.get({ plain: true }));
 
         // sending posts as an object to homepage-handlebars template so we can add other properties to the template later on
-        res.render('homepage', { posts });
+        // to make sure logout displays on home page if user is logged in!
+        res.render('homepage', {
+            posts,
+            loggedIn: req.session.loggedIn
+        });
     })
     .catch(err => {
         console.log(err);

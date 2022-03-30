@@ -13,6 +13,8 @@
   </div>
 </article>
 
+{{!-- if user is logged in, display this --}}
+{{#if loggedIn}}
 <form class="comment-form">
   <div>
     <textarea name="comment-body"></textarea>
@@ -23,6 +25,7 @@
     <button type="button" class="upvote-btn">upvote</button>
   </div>
 </form>
+{{/if}}
 
 <div class="comments">
   {{#each post.comments}}  {{!-- iterate over the comments array, could've written 'post.comments as |comment|' --}}
@@ -37,5 +40,8 @@
   {{/each}}
 </div>
 
+{{!-- shouldn't load these scripts unless user is logged in because don't need them! --}}
+{{#if loggedIn}}
 <script src="/javascript/comment.js"></script>
-<script src="/javascript/upvote.js"></script> 
+<script src="/javascript/upvote.js"></script>
+{{/if}}
