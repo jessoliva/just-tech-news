@@ -12,9 +12,13 @@ const PORT = process.env.PORT || 3001;
 // importing the connection to Sequelize from config/connection.js. Then, at the bottom of the file, we use the sequelize.sync() method to establish the connection to the database
 const sequelize = require('./config/connection');
 
+// import helper functions
+const helpers = require('./utils/helpers');
+
 // express-handlebars
 const exphbs = require('express-handlebars');
-const hbs = exphbs.create({});
+// pass the helpers to the existing exphbs.create() statement 
+const hbs = exphbs.create({ helpers });
 
 // Sessions allow our Express.js server to keep track of which user is making a request, and store useful data about them in memory
 const session = require('express-session');
