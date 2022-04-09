@@ -1,4 +1,4 @@
-// installed dependencies: npm install express sequelize mysql2 express-handlebars express-session connect-session-sequelize
+// installed dependencies: npm install express sequelize mysql2 express-handlebars express-session connect-session-sequelize bcrypt dotenv
 
 
 // express
