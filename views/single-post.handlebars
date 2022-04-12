@@ -1,0 +1,26 @@
+{{!-- single post page --}}
+
+{{!-- code in post-info as a partial --}}
+{{> post-info post}}
+
+{{!-- if user is logged in, display this --}}
+{{#if loggedIn}}
+<form class="comment-form">
+  <div>
+    <textarea name="comment-body"></textarea>
+  </div>
+
+  <div>
+    <button type="submit">add comment</button>
+    <button type="button" class="upvote-btn">upvote</button>
+  </div>
+</form>
+{{/if}}
+
+{{> comments post.comments}}
+
+{{!-- shouldn't load these scripts unless user is logged in because don't need them! --}}
+{{#if loggedIn}}
+<script src="/javascript/comment.js"></script>
+<script src="/javascript/upvote.js"></script>
+{{/if}}

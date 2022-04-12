@@ -1,0 +1,15 @@
+<ol class="post-list">
+  {{#each posts as |post|}} {{!-- give each element in the posts object the name post --}}
+  <li>
+      {{!-- code moved to post-info and set up as a partial--}}
+      {{!-- to use a partial, all we need is the > followed by the name of the partial file and the object we'll pass to the partial --}}
+      {{> post-info post }}
+  </li>
+  {{/each}}
+</ol>
+{{!-- Note the use of '#each' to begin the loop and '/each' to define where it ends. Any HTML code in between (e.g., the <li> element) will be repeated for every item in posts --}}
+{{!-- Within the '#each block', Handlebars.js is smart enough to know that it's working with an object on each iteration, so it looks for the necessary properties. --}}
+
+{{!-- expressions replaced with data from home-routes.js --}}
+
+{{!-- {{ will convert HTML characters to strings --}}

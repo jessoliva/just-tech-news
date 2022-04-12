@@ -1,13 +1,15 @@
 // create five routes that will work with the User model to perform Create Read Update Delete operations
 
-const userRouter = require('express').Router();
+// DO NOT NEED WITHAUTH HERE!!!
+
+const router = require('express').Router();
 // importing exported User object from models/index.js
 const { User, Post, Vote, Comment} = require('../../models');
 
 // These endpoints for the server are going to be accessible at the /api/users URL
 
 // GET /api/users
-userRouter.get('/', (req, res) => {
+router.get('/', (req, res) => {
     // Access our User model and run .findAll() method)
     User.findAll({
         attributes: { exclude: ['password'] }
@@ -27,7 +29,7 @@ userRouter.get('/', (req, res) => {
 
 // GET /api/users/1
 // : means whatever is written in this sxn of the url is going to be captured as part as the req.params object 
-userRouter.get('/:id', (req, res) => {
+router.get('/:id', (req, res) => {
     User.findOne({
         attributes: { exclude: ['password'] },
         where: { // where = object
@@ -75,7 +77,7 @@ userRouter.get('/:id', (req, res) => {
 // Because we're looking for one user, there's the possibility that we could accidentally search for a user with a nonexistent id value. Therefore, if the .then() method returns nothing from the query, we send a 404 status back to the client to indicate everything's okay and they just asked for the wrong piece of data
 
 // POST /api/users
-userRouter.post('/', (req, res) => {
+router.post('/', (req, res) => {
 
     // there's a hook for beforeCreate
     User.create({
@@ -84,7 +86,16 @@ userRouter.post('/', (req, res) => {
         password: req.body.password
         // comes from the form submitting this data
     })
-    .then(dbUserData => res.json(dbUserData))
+    .then(dbUserData => {
+        req.session.save(() => { // accessing the session information in the routes
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+        
+            res.json(dbUserData);
+        });
+        // We want to make sure the session is created before we send the response back, so we're wrapping the variables in a callback. The req.session.save() method will initiate the creation of the session and then run the callback function once complete.
+    })
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
@@ -95,7 +106,7 @@ userRouter.post('/', (req, res) => {
 
 // verify user's identity
 // route will be found at http://localhost:3001/api/users/login
-userRouter.post('/login', (req, res) => {
+router.post('/login', (req, res) => {
 
     // first step will be to find the instance of a user that contains the user's credentials
     // .findOne() Sequelize method looks for a user with the specified email saved as req.body.email
@@ -131,15 +142,36 @@ userRouter.post('/login', (req, res) => {
             return;
         }
         
-        // However, if there is a match, the conditional statement block is ignored, and a response with the data and the message "You are now logged in." is sent instead.
-        res.json({ user: dbUserData, message: 'You are now logged in!' });
+        // if there is a match, the conditional statement block is ignored, and a response with the data and the message "You are now logged in." is sent instead.
+        // 
+        req.session.save(() => {
+            // declare session variables
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+      
+            res.json({ user: dbUserData, message: 'You are now logged in!' });
+        });
     });
 })
 //In this case, a login route could've used the GET method since it doesn't actually create or insert anything into the database. But there is a reason why a POST is the standard for the login that's in process. A GET method carries the request parameter appended in the URL string, whereas a POST method carries the request parameter in req.body, which makes it a more secure way of transferring data from the client to the server. Remember, the password is still in plaintext, which makes this transmission process a vulnerable link in the chain
 // We queried the User table using the findOne() method for the email entered by the user and assigned it to req.body.email
 
+router.post('/logout', (req, res) => {
+    if (req.session.loggedIn) {
+        //  use the destroy() method to clear the session
+        req.session.destroy(() => {
+            res.status(204).end();
+        });
+        // The HTTP 204 No Content success status response code indicates that a request has succeeded, but that the client doesn't need to navigate away from its current page
+    }
+    else {
+        res.status(404).end();
+    }
+});
+
 // PUT /api/users/1
-userRouter.put('/:id', (req, res) => {
+router.put('/:id', (req, res) => {
     
     // there's a hook for beforeUpdate
     // if req.body has exact key/value pairs to match the model, you can just use `req.body` instead
@@ -167,7 +199,7 @@ userRouter.put('/:id', (req, res) => {
 // We pass in req.body to provide the new data we want to use in the update and req.params.id to indicate where exactly we want that new data to be used
 
 // DELETE /api/users/1
-userRouter.delete('/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
     User.destroy({
         where: {
             id: req.params.id
@@ -187,4 +219,4 @@ userRouter.delete('/:id', (req, res) => {
 });
 // To delete data, use the .destroy() method and provide some type of identifier to indicate where exactly we would like to delete data from the user database table --> req.params.id
 
-module.exports = userRouter;
+module.exports = router;
