@@ -2,6 +2,7 @@ const postRouter = require('express').Router();
 const sequelize = require('../../config/connection');
 const { Post, User, Vote, Comment } = require('../../models');
 // included Post model because In a query to the post table, we would like to retrieve not only information about each post, but also the user that posted it. With the foreign key, user_id, we can form a JOIN, an essential characteristic of the relational data model
+const withAuth = require('../../utils/auth');
 
 // get all posts /api/posts
 postRouter.get('/', (req, res) => {
@@ -93,7 +94,7 @@ postRouter.get('/:id', (req, res) => {
 });
 
 // create a post!
-postRouter.post('/', (req, res) => {
+postRouter.post('/', withAuth, (req, res) => {
 
     // using req.body to populate the columns in the post table
     // everything on the left are the column names
@@ -102,7 +103,7 @@ postRouter.post('/', (req, res) => {
     Post.create({
         title: req.body.title,
         post_url: req.body.post_url,
-        user_id: req.body.user_id
+        user_id: req.session.user_id // from req.body.user_id
     })
     .then(dbUserData => res.json(dbUserData))
     .catch(err => {
@@ -113,7 +114,7 @@ postRouter.post('/', (req, res) => {
 
 // When we vote on a post, we're technically updating that post's data. This means that we should create a PUT route for updating a post
 // PUT /api/posts/upvote
-postRouter.put('/upvote', (req, res) => {
+postRouter.put('/upvote', withAuth, (req, res) => {
 
     // make sure the session exists first
     if (req.session.loggedIn) {
@@ -131,7 +132,7 @@ postRouter.put('/upvote', (req, res) => {
 // Make sure this PUT route is defined before the /:id PUT route, though. Otherwise, Express.js will think the word "upvote" is a valid parameter for /:id
 
 // update title of a post
-postRouter.put('/:id', (req, res) => {
+postRouter.put('/:id', withAuth, (req, res) => {
 
     Post.update(
         { // used the req.body.title value to replace the title of the post
@@ -159,7 +160,7 @@ postRouter.put('/:id', (req, res) => {
 });
 
 // delete a post
-postRouter.delete('/:id', (req, res) => {
+postRouter.delete('/:id', withAuth, (req, res) => {
     Post.destroy({
         where: {
             id: req.params.id

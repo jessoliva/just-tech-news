@@ -1,5 +1,7 @@
 // create five routes that will work with the User model to perform Create Read Update Delete operations
 
+// DO NOT NEED WITHAUTH HERE!!!
+
 const router = require('express').Router();
 // importing exported User object from models/index.js
 const { User, Post, Vote, Comment} = require('../../models');
